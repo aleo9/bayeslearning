@@ -18,7 +18,6 @@
 
 import numpy as np
 from scipy import misc
-from imp import reload
 from labfuns import *
 import random
 
@@ -42,11 +41,14 @@ def computePrior(labels, W=None):
 
     prior = np.zeros((Nclasses, 1))
 
-    # TODO: compute the values of prior for each class!
-    # ==========================
+    print("////////////////////////ASSIGMENT 2//////////////////////////")
 
-    # ==========================
+    for jdx, c in enumerate(classes):
+        idx = np.where(labels == c)[0]  # Vector of length C of indices for a given label class c
+        prior[c] = len(idx) / len(X)
 
+    print("PRIOR")
+    print(prior)
     return prior
 
 
@@ -66,43 +68,32 @@ def mlParams(X, labels, W=None):
 
     mu = np.zeros((Nclasses, Ndims))
     sigma = np.zeros((Nclasses, Ndims, Ndims))
-    print("printing mu")
-    print(mu)
 
-    print("printing sigma")
-    print(sigma)
+    print("////////////////////////ASSIGMENT 1//////////////////////////")
 
-    print("printing X")
-    print(X)
-    print("printing labels")
-    print(labels)
-
-    # mu[0][1] = 2
-    # muX =[0, 0, 0, 0, 0]
-    # muY = [0, 0, 0, 0, 0]
-    # musums = [(0,0),(0,0),(0,0),(0,0),(0,0)]
-    mutot = [0, 0, 0, 0, 0]
-    # mu0,mu1,mu2,mu3,mu4 =0
-    # mu0tot, mu1tot, mu2tot, mu3tot, mu4tot = 0
-
+    mutot = np.zeros(Nclasses)
     for i in range(0, len(X)):
         mu[labels[i]] += X[i]
         mutot[labels[i]] += 1
-    print("mutot")
-    print(mutot)
     for i in range(0, Nclasses):
         mu[i] = mu[i] / mutot[i]
 
-    print("printing new mu sums")
+    print("MU")
     print(mu)
-    # print(muY)
-    print("printing new mu tots")
-    print(mutot)
+    print()
 
-    # TODO: fill in the code to compute mu and sigma!
-    # ==========================
+    varienceTot = np.zeros((Nclasses, Ndims))
 
-    # ==========================
+    for jdx, c in enumerate(classes):
+        idx = np.where(labels == c)[0]  # Vector of length C of indices for a given label class c
+        for i in range(0, len(idx)):
+            varienceTot[c] += ((X[idx[i]] - mu[c]) * (X[idx[i]] - mu[c]))
+
+        varienceTot[c] = varienceTot[c] / len(idx)
+        sigma[c] = np.diag(varienceTot[c])
+
+    print("SIGMA")
+    print(sigma)
 
     return mu, sigma
 
@@ -116,12 +107,13 @@ def classifyBayes(X, prior, mu, sigma):
     Npts = X.shape[0]
     Nclasses, Ndims = np.shape(mu)
     logProb = np.zeros((Nclasses, Npts))
+    print(logProb)
 
-    # TODO: fill in the code to compute the log posterior logProb!
-    # ==========================
+    for jdx in range(0, Nclasses):
+        differance = X - mu[jdx]
+        lnPrior = np.log(prior[jdx])
 
-    # ==========================
-
+    print(logProb)
     # one possible way of finding max a-posteriori once
     # you have computed the log posterior
     h = np.argmax(logProb, axis=0)
@@ -155,6 +147,8 @@ class BayesClassifier(object):
 X, labels = genBlobs(centers=5)
 mu, sigma = mlParams(X, labels)
 plotGaussian(X, labels, mu, sigma)
+prior = computePrior(labels)
+classifyBayes(X, prior, mu, sigma)
 
 
 # Call the `testClassifier` and `plotBoundary` functions for this part.
@@ -315,4 +309,3 @@ class BoostClassifier(object):
 # visualize the test point together with the training points used to train
 # the class that the test point was classified to belong to
 # visualizeOlivettiVectors(xTr[yTr == yPr[testind],:], xTe[testind,:])
-
