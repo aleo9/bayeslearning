@@ -109,9 +109,15 @@ def classifyBayes(X, prior, mu, sigma):
     logProb = np.zeros((Nclasses, Npts))
     print(logProb)
 
-    for jdx in range(0, Nclasses):
-        differance = X - mu[jdx]
-        lnPrior = np.log(prior[jdx])
+    for i in range(Npts):
+        for jdx in range(0, Nclasses):
+            lnDet = (1/2)*np.log(np.linalg.det(sigma))
+            difference = (1/2)*(X[i] - mu[jdx])
+            sig = 1/sigma[jdx]  ##???
+            transpose = np.transpose(X[i]-mu[jdx])
+            lnPrior = np.log(prior[jdx])
+
+            logProb[jdx][i] = - lnDet - difference * sig * transpose + lnPrior
 
     print(logProb)
     # one possible way of finding max a-posteriori once
