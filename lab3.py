@@ -58,42 +58,48 @@ def computePrior(labels, W=None):
 # out:    mu - C x d matrix of class means (mu[i] - class i mean)
 #      sigma - C x d x d matrix of class covariances (sigma[i] - class i sigma)
 def mlParams(X, labels, W=None):
-    assert (X.shape[0] == labels.shape[0])
+    assert(X.shape[0]==labels.shape[0])
     Npts, Ndims = np.shape(X)
     classes = np.unique(labels)
     Nclasses = np.size(classes)
 
     if W is None:
-        W = np.ones((Npts, 1)) / float(Npts)
+        W = np.ones((Npts, 1))/float(Npts)
 
     mu = np.zeros((Nclasses, Ndims))
     sigma = np.zeros((Nclasses, Ndims, Ndims))
 
-    print("////////////////////////ASSIGMENT 1//////////////////////////")
+
+    #print("////////////////////////ASSIGMENT 1//////////////////////////")
 
     mutot = np.zeros(Nclasses)
     for i in range(0, len(X)):
-        mu[labels[i]] += X[i]
-        mutot[labels[i]] += 1
+        mu[labels[i]] += X[i]*W[i]
+        mutot[labels[i]] += W[i]
     for i in range(0, Nclasses):
         mu[i] = mu[i] / mutot[i]
 
-    print("MU")
-    print(mu)
-    print()
+    #print("MU")
+    #print(mu)
+    #print()
 
-    varienceTot = np.zeros((Nclasses, Ndims))
+    #varienceTot = np.zeros((Nclasses, Ndims))
 
-    for jdx, c in enumerate(classes):
-        idx = np.where(labels == c)[0]  # Vector of length C of indices for a given label class c
-        for i in range(0, len(idx)):
-            varienceTot[c] += ((X[idx[i]] - mu[c]) * (X[idx[i]] - mu[c]))
+    for i, c in enumerate(classes):
+        idx = np.where(labels == c)[0]
+        sampleMatches = X[idx]
+        diffToMean = np.square(sampleMatches-mu[i])*W[idx]
 
-        varienceTot[c] = varienceTot[c] / len(idx)
-        sigma[c] = np.diag(varienceTot[c])
+        classSums = np.zeros(Nclasses - 1)
+        for j in range(0, len(diffToMean)):
+            for cindex in range(0, (Nclasses - 1)):
+                classSums[cindex] += diffToMean[j][cindex]
 
-    print("SIGMA")
-    print(sigma)
+        sum = classSums / np.sum(W[idx])
+        sigma[i] = np.diag(sum)
+
+    #print("SIGMA")
+    #print(sigma)
 
     return mu, sigma
 
